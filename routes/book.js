@@ -16,7 +16,7 @@ var expectedPatchPayload = {
 };
 
 /**
- * routing function to hand GET requests
+ * routing function to handle GET requests
  * 
  * @param {*} req 
  * @param {*} res 
@@ -33,7 +33,7 @@ async function getBooks(req, res) {
 }
   
 /**
- * routing function to hand POST requests
+ * routing function to handle POST requests
  * 
  * @param {*} req 
  * @param {*} res 
@@ -60,7 +60,7 @@ function postBook(req, res) {
 }
   
 /**
- * routing function to hand DELETE requests
+ * routing function to handle DELETE requests
  * 
  * @param {*} req 
  * @param {*} res 
@@ -91,7 +91,7 @@ function deleteBook(req, res) {
 };
   
 /**
- * routing function to hand PATCH requests
+ * routing function to handle PATCH requests
  * 
  * @param {*} req 
  * @param {*} res 
@@ -123,7 +123,7 @@ function patchBook(req, res) {
 }
   
 /**
- * routing function to hand PUT requests
+ * routing function to handle PUT requests
  * 
  * @param {*} req 
  * @param {*} res 

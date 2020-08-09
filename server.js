@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.text());                                    
 app.use(bodyParser.json({ type: 'application/json'}));
 
-// setup routes for home and book
+// setup routes for welcome request and book requests
 app.get("/", (req, res) => res.json({message: "Welcome to Virtual library!"}));
 
 app.route("/book")

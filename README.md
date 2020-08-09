@@ -17,6 +17,8 @@ Runs the app in the test mode.<br />
 
 Results of the tests will output in the calling terminal.
 
+## Also
+
 ### Code Documentation
 
 Open ./out/index.html in the browser to view code documentation
@@ -25,7 +27,8 @@ Open ./out/index.html in the browser to view code documentation
 
 Open [http://localhost:3000/api-docs](http://localhost:3000/api-docs) to view the swagger documents in the browser.
 
-### Development Notes
+## Development Notes
+
 - Create code documentation:
 ```
 $ npm run generate-docs
