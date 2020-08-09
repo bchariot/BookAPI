@@ -15,6 +15,12 @@ var expectedPatchPayload = {
   "new_book" : ""
 };
 
+/**
+ * routing function to hand GET requests
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 async function getBooks(req, res) {
   index = -1;
   if (req.query.id) {
@@ -26,6 +32,12 @@ async function getBooks(req, res) {
   return;
 }
   
+/**
+ * routing function to hand POST requests
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 function postBook(req, res) {
     if (req.body) {
         var result = payloadChecker.validator(req.body,expectedPayload,["book"],false);
@@ -47,6 +59,12 @@ function postBook(req, res) {
     }
 }
   
+/**
+ * routing function to hand DELETE requests
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 function deleteBook(req, res) {
     if (req.body) {
         var result = payloadChecker.validator(req.body,expectedPayload,["book"],false);
@@ -72,6 +90,12 @@ function deleteBook(req, res) {
     }
 };
   
+/**
+ * routing function to hand PATCH requests
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 function patchBook(req, res) {
     if (req.body) {
       var result = payloadChecker.validator(req.body,expectedPatchPayload,["original_book", "new_book"],false);
@@ -98,6 +122,12 @@ function patchBook(req, res) {
     }
 }
   
+/**
+ * routing function to hand PUT requests
+ * 
+ * @param {*} req 
+ * @param {*} res 
+ */
 async function putBook(req, res) {
     str = [];
     for (var i = 0; i < bookArray.length; i++) {
