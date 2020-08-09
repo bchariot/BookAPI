@@ -7,9 +7,9 @@ In the project directory, you can run:
 Runs the app in the development mode.<br />
 The server will NOT reload if you make edits.<br />
 
-Use POSTMAN to test urls:
--localhost:3000/
--localhost:3000/book
+Use POSTMAN to test urls:<br />
+- localhost:3000/
+- localhost:3000/book
 
 ### `npm run server`
 
