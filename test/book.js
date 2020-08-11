@@ -16,7 +16,16 @@ describe('Books', () => {
                     done();
               });
         });
-    });
+        it('it should not GET a book from the library with index outside of range', (done) => {
+            chai.request(server)
+                .get('/book?id=23')
+                .end((err, res) => {
+                      res.should.have.status(418);
+                      res.body.should.be.a('object');
+                      done();
+                });
+          });
+      });
   
     describe('/POST book', () => {
         it('it should not POST a book with name of book an integer', (done) => {
@@ -30,7 +39,7 @@ describe('Books', () => {
                 done();
             });
         });
-        it('it should not POST a book with element "book" mispelled', (done) => {
+        it('it should not POST a book with element "book" misspelled', (done) => {
             let book = {"bok": 1};
             chai.request(server)
                 .post('/book')
@@ -77,7 +86,7 @@ describe('Books', () => {
                 done();
             });
         });
-        it('it should not DELETE a book with element "book" mispelled', (done) => {
+        it('it should not DELETE a book with element "book" misspelled', (done) => {
             let book = {"bok": 1};
             chai.request(server)
                 .delete('/book')
@@ -124,7 +133,7 @@ describe('Books', () => {
                 done();
             });
         });
-        it('it should not PATCH a book with element "original_book" mispelled', (done) => {
+        it('it should not PATCH a book with element "original_book" misspelled', (done) => {
             let book = {"original_bok": "The Lord Of The Rings", "new_book": "The Hobbit"};
             chai.request(server)
                 .patch('/book')
@@ -146,7 +155,7 @@ describe('Books', () => {
                 done();
             });
         });
-        it('it should not PATCH a book with element "new_book" mispelled', (done) => {
+        it('it should not PATCH a book with element "new_book" misspelled', (done) => {
             let book = {"original_bok": "The Lord Of The Rings", "new_book": "The Hobbit"};
             chai.request(server)
                 .patch('/book')
@@ -182,14 +191,34 @@ describe('Books', () => {
     });
 
     describe('/PUT books', () => {
-        it('it should PUT all the books into the library', (done) => {
-          chai.request(server)
-              .put('/book')
-              .end((err, res) => {
+        it('it should PUT all the books into the database', (done) => {
+            chai.request(server)
+                .put('/book')
+                .end((err, res) => {
                     res.should.have.status(200);
                     res.body.should.be.a('object');
                     done();
-              });
+            });
+        });
+        it('it should POST a book into the library that has less than 3 characters', (done) => {
+            let book = {"book": "It"};
+            chai.request(server)
+                .post('/book')
+                .send(book)
+                .end((err, res) => {
+                    res.should.have.status(200);
+                    res.body.should.be.a('object');
+                done();
+            });
+        });
+        it('it should not PUT a book into the database if name is less than 3 characters', (done) => {
+            chai.request(server)
+                .put('/book')
+                .end((err, res) => {
+                    res.should.have.status(418);
+                    res.body.should.be.a('object');
+                    done();
+            });
         });
     });
 });

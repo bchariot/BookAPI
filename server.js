@@ -9,14 +9,16 @@ const app = express();
 const port = 3000;
 
 // do not use Morgan when in "test" mode
-env = app.get('env');
-if (env !== 'test')
-{
+let env = app.get('env');
+if (env !== 'test') {
     app.use(morgan('combined'));
 }
 
-// setup route for Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
+// swagger only available in "devdelopment" mode
+if (env === 'development') {
+    // setup route for Swagger
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
+}
 
 app.use(bodyParser.json());                                     
 app.use(bodyParser.urlencoded({extended: true}));               

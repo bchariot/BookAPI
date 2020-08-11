@@ -84,6 +84,19 @@ module.exports = {
                 }
               }
             }
+          },
+          '418': {
+            description: `Error: I'm a Teapot`,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'string'
+                },
+                example: {
+                  errorMessage: "No such index: 29, must be an integer and between -1 (for full list) and 3 (list length - 1)"
+                }
+              }
+            }
           }
         }
       },
@@ -285,6 +298,23 @@ module.exports = {
                   "Gone With The Wind":38,
                   "The Lord Of The Rings":15,
                   "Advanced Calculus":135
+                }
+              }
+            }
+          },
+          '418': {
+            description: `Error: I'm a Teapot`,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'string'
+                },
+                example: {
+                  "Dune":59,
+                  "Gone With The Wind":38,
+                  "The Lord Of The Rings":15,
+                  "Advanced Calculus":135,
+                  "It":0
                 }
               }
             }

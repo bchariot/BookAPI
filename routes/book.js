@@ -2,6 +2,9 @@ const express = require('express')
 const path = require('path');
 const bodyParser = require('body-parser');
 let payloadChecker = require('payload-validator');
+const { isNullOrUndefined } = require('util');
+
+const app = express();
 
 let bookArray = ["Dune", "Gone With The Wind", "The Lord Of The Rings", "Advanced Calculus"];
 let favoriteSeparator = "*#*";
@@ -28,7 +31,12 @@ async function getBooks(req, res) {
   }
 
   bookString = await getBookList(bookArray, index, favoriteSeparator);
-  res.json({message: bookString});
+  if (bookString.startsWith('No such index')) {
+    res.status(418).json({message: bookString});
+  }
+  else {
+    res.status(200).json({message: bookString});
+  }
   return;
 }
   
@@ -39,24 +47,24 @@ async function getBooks(req, res) {
  * @param {*} res 
  */
 function postBook(req, res) {
-    if (req.body) {
-        var result = payloadChecker.validator(req.body,expectedPayload,["book"],false);
-        if (result.success) {
-            addedBook = req.body.book;
+  if (req.body) {
+    var result = payloadChecker.validator(req.body,expectedPayload,["book"],false);
+    if (result.success) {
+      addedBook = req.body.book;
 
-            if (!bookArray.includes(addedBook)) {
-                bookArray.push(addedBook);
-                res.json({message: "Book '" + addedBook + "' has been added to the library"});
-            }
-            else {
-                res.status(409).json({errorMessage: "Book '" + addedBook + "' already in the library"});
-            }
-        } else {
-          res.status(406).json({errorMessage: result.response.errorMessage});
-        }
+      if (!bookArray.includes(addedBook)) {
+        bookArray.push(addedBook);
+        res.json({message: `Book '${addedBook}' has been added to the library`});
+      }
+      else {
+        res.status(409).json({errorMessage: `Book '${addedBook}' already in the library`});
+      }
     } else {
-      res.status(406).json({errorMessage: "POST payload not correct"});
+      res.status(406).json({errorMessage: result.response.errorMessage});
     }
+  } else {
+    res.status(406).json({errorMessage: "POST payload not correct"});
+  }
 }
   
 /**
@@ -66,28 +74,28 @@ function postBook(req, res) {
  * @param {*} res 
  */
 function deleteBook(req, res) {
-    if (req.body) {
-        var result = payloadChecker.validator(req.body,expectedPayload,["book"],false);
-        if (result.success) {
-            deleteBook = req.body.book;
+  if (req.body) {
+    var result = payloadChecker.validator(req.body,expectedPayload,["book"],false);
+    if (result.success) {
+      deletedBook = req.body.book;
 
-            if (bookArray.includes(deleteBook)) {
-                for (var i = 0; i < bookArray.length; i++) {
-                    if (bookArray[i] === deleteBook) {
-                        bookArray.splice(i, 1);
-                    }
-                }
-                res.json({message: 'Book "' + deleteBook + '" removed from the library'});
-            }
-            else {
-                res.status(404).json({errorMessage: 'Book "' + deleteBook + '" not found in the library'});
-            }
-        } else {
-          res.status(406).json({errorMessage: result.response.errorMessage});
+      if (bookArray.includes(deletedBook)) {
+        for (var i = 0; i < bookArray.length; i++) {
+          if (bookArray[i] === deletedBook) {
+            bookArray.splice(i, 1);
+          }
         }
+        res.json({message: `'Book '${deletedBook}' removed from the library`});
+      }
+      else {
+        res.status(404).json({errorMessage: `Book '${deletedBook}' not found in the library`});
+      }
     } else {
-      res.status(406).json({errorMessage: "DELETE payload not correct"});
+      res.status(406).json({errorMessage: result.response.errorMessage});
     }
+  } else {
+    res.status(406).json({errorMessage: "DELETE payload not correct"});
+  }
 };
   
 /**
@@ -97,29 +105,29 @@ function deleteBook(req, res) {
  * @param {*} res 
  */
 function patchBook(req, res) {
-    if (req.body) {
-      var result = payloadChecker.validator(req.body,expectedPatchPayload,["original_book", "new_book"],false);
-      if (result.success) {
-        originalBook = req.body.original_book;
-        newBook = req.body.new_book;
-  
-        if (bookArray.includes(originalBook)) {
-          for (var i = 0; i < bookArray.length; i++) {
-            if (bookArray[i] === originalBook) {
-              bookArray[i] = newBook;
-            }
+  if (req.body) {
+    var result = payloadChecker.validator(req.body,expectedPatchPayload,["original_book", "new_book"],false);
+    if (result.success) {
+      originalBook = req.body.original_book;
+      newBook = req.body.new_book;
+
+      if (bookArray.includes(originalBook)) {
+        for (var i = 0; i < bookArray.length; i++) {
+          if (bookArray[i] === originalBook) {
+            bookArray[i] = newBook;
           }
-          res.json({message: 'Book "' + originalBook + '" has been renamed to "' + newBook + '" in the library'});
         }
-        else {
-          res.status(404).json({errorMessage: 'Book "' + originalBook + '" not found in the library'});
-        }
-      } else {
-        res.status(406).json({errorMessage: result.response.errorMessage});
+        res.json({message: `Book '${originalBook}' has been renamed to '${newBook}' in the library`});
+      }
+      else {
+        res.status(404).json({errorMessage: `Book '${originalBook}' not found in the library`});
       }
     } else {
-      res.status(406).json({errorMessage: "PATCH payload not correct"});
+      res.status(406).json({errorMessage: result.response.errorMessage});
     }
+  } else {
+    res.status(406).json({errorMessage: "PATCH payload not correct"});
+  }
 }
   
 /**
@@ -129,12 +137,18 @@ function patchBook(req, res) {
  * @param {*} res 
  */
 async function putBook(req, res) {
-    str = [];
-    for (var i = 0; i < bookArray.length; i++) {
-      str.push('"' + bookArray[i] + '":' + await saveItemOnDatabase(bookArray[i]));
-    }
-  
-    res.send('{' + str.join() + '}');
+  str = [];
+  for (var i = 0; i < bookArray.length; i++) {
+    str.push(`"${bookArray[i]}": ${await saveItemOnDatabase(bookArray[i])}`);
+  }
+
+  stringResult = `{ ${str.join()} }`;
+  if (stringResult.indexOf(": 0") > 0) {
+    res.status(418).send(stringResult);
+  }
+  else {
+    res.status(200).send(stringResult);
+  }
 }
 
 /**
@@ -148,13 +162,43 @@ async function putBook(req, res) {
  * @returns {string}
  */
 async function getBookList(list, index, separator) {
-  if (index === -1) {
-    str = list.join(separator);
-    return Promise.resolve(str);
-  }
-  else {
-    return Promise.resolve(list[index]);
-  }
+  let env = app.get('env');
+  let promise = new Promise((resolve, reject) => {
+    let idx = parseInt(index);
+    let str = "";
+
+    if (idx === -1) {
+      str = list.join(separator);
+    }
+    else {
+      str = list[idx];
+    }
+
+    if (!isNullOrUndefined(str)) {
+      resolve(str);
+    }
+    else {
+      str = `No such index: ${index}, must be an integer and between -1 (for full list) and ${list.length - 1} (list length - 1)`;
+      reject(str);
+    }
+
+    return str;
+  });
+
+  return await promise.then(
+    function(str) {
+      if (env !== 'test') {
+        console.log(`success`);
+      }
+      return str;
+    },
+    function(str) {
+      if (env !== 'test') {
+        console.log(str);
+      }
+      return str;
+    }
+  );
 }
 
 /**
@@ -167,13 +211,32 @@ async function getBookList(list, index, separator) {
  * @returns {number}
  */
 async function saveItemOnDatabase(name) {
+  let env = app.get('env');
   let promise = new Promise((resolve, reject) => {
     interval = Math.round(10 * Math.random() * name.length);
-    setTimeout(() => resolve(interval), interval);
+    if (name.length > 2) {
+      setTimeout(() => resolve(interval), interval);
+    }
+    else {
+      reject(Error(`failure: '${name}' too short, not added to database`));
+    }
     return interval;
   });
 
-  return await promise;
+  return await promise.then(
+    function(interval) {
+      if (env !== 'test') {
+        console.log(`success - added ${name} to database`);
+      }
+      return interval;
+    },
+    function(err) {
+      if (env !== 'test') {
+        console.log(err);
+      }
+      return 0;
+    }
+  );
 }
 
 module.exports = { getBooks, postBook, deleteBook, patchBook, putBook };
