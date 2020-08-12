@@ -20,13 +20,13 @@ if (env === 'development') {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocumentation));
 }
 
-app.use(bodyParser.json());                                     
-app.use(bodyParser.urlencoded({extended: true}));               
-app.use(bodyParser.text());                                    
-app.use(bodyParser.json({ type: 'application/json'}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.text());
+app.use(bodyParser.json({ type: 'application/json' }));
 
 // setup routes for welcome request and book requests
-app.get("/", (req, res) => res.json({message: "Welcome to Virtual library!"}));
+app.get("/", (req, res) => res.json({ message: "Welcome to Virtual library!" }));
 
 app.route("/book")
     .get(book.getBooks)
