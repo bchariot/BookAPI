@@ -1,14 +1,16 @@
 const express = require('express')
-const path = require('path');
-const bodyParser = require('body-parser');
 let payloadChecker = require('payload-validator');
 const { isNullOrUndefined } = require('util');
 
 const app = express();
 
 let bookArray = ["Dune", "Gone With The Wind", "The Lord Of The Rings", "Advanced Calculus"];
-let favoriteSeparator = "*#*";
+const favoriteSeparator = "*#*";
 
+let putArray = [];
+let putCount = 0;
+
+// for payload validation purposes
 let expectedPayload = {
   "book": ""
 };
@@ -17,6 +19,7 @@ let expectedPatchPayload = {
   "original_book": "",
   "new_book": ""
 };
+
 
 /**
  * routing function to handle GET requests
@@ -30,14 +33,14 @@ async function getBooks(req, res) {
     index = req.query.id;
   }
 
-  let bookString = await getBookList(bookArray, index, favoriteSeparator);
-  if (bookString.startsWith('No such index')) {
-    res.status(418).json({ message: bookString });
-  }
-  else {
-    res.status(200).json({ message: bookString });
-  }
-  return;
+  await getBookList(bookArray, index, favoriteSeparator, (err, result) => {
+    if (!isNullOrUndefined(err)) {
+      res.status(418).json({ message: err });
+    }
+    else {
+      res.status(200).json({ message: result });
+    }
+  });
 }
 
 /**
@@ -137,68 +140,40 @@ function patchBook(req, res) {
  * @param {*} res 
  */
 async function putBook(req, res) {
-  let str = [];
-  for (var i = 0; i < bookArray.length; i++) {
-    str.push(`"${bookArray[i]}": ${await saveItemOnDatabase(bookArray[i])}`);
-  }
+  putArray = [];
+  putCount = 0;
 
-  let stringResult = `{ ${str.join()} }`;
-  if (stringResult.indexOf(": 0") > 0) {
-    res.status(418).send(stringResult);
-  }
-  else {
-    res.status(200).send(stringResult);
-  }
+  saveItemOnDatabase(res, outputResults);
 }
 
 /**
  * If the index parameter is set to -1 this function will return a string delimited using
- * the given separator of the given list.  Otherwise, the function will return the book name
- * if the book at the given index in the list
+ * the given separator for the given list.  Otherwise, the function will return the book name
+ * of the book at the given index in the list.  Error message returned if index out of range.
  * 
  * @param {array} list Array list of book names
  * @param {number} index The index to find within the array
  * @param {string} separator The favorite separator to use as a delimiter in the return string
+ * @param {*} callback Callback function place holder
  * @returns {string}
  */
-async function getBookList(list, index, separator) {
-  let env = app.get('env');
-  let promise = new Promise((resolve, reject) => {
-    let idx = parseInt(index);
-    let str = "";
+async function getBookList(list, index, separator, callback) {
+  let idx = parseInt(index);
+  let str = "";
 
-    if (idx === -1) {
-      str = list.join(separator);
-    }
-    else {
-      str = list[idx];
-    }
+  if (idx === -1) {
+    str = list.join(separator);
+  }
+  else {
+    str = list[idx];
+  }
 
-    if (!isNullOrUndefined(str)) {
-      resolve(str);
-    }
-    else {
-      str = `No such index: ${index}, must be an integer and between -1 (for full list) and ${list.length - 1} (list length - 1)`;
-      reject(str);
-    }
-
-    return str;
-  });
-
-  return await promise.then(
-    function (str) {
-      if (env !== 'test') {
-        console.log(`success`);
-      }
-      return str;
-    },
-    function (str) {
-      if (env !== 'test') {
-        console.log(str);
-      }
-      return str;
-    }
-  );
+  if (isNullOrUndefined(str)) {
+    callback(`No such index: ${index}, must be an integer and between -1 (for full list) and ${list.length - 1} (list length - 1)`, null);
+  }
+  else {
+    callback(null, str);
+  }
 }
 
 /**
@@ -207,36 +182,37 @@ async function getBookList(list, index, separator) {
  * The function then delays for this interval and finally returns
  * the value of the interval back to the method that called it. 
  * 
- * @param {string} name The name of the book
- * @returns {number}
+ * @param {*} res
+ * @param {*} callback Callback function place holder
  */
-async function saveItemOnDatabase(name) {
-  let env = app.get('env');
-  let promise = new Promise((resolve, reject) => {
-    let interval = Math.round(10 * Math.random() * name.length);
-    if (name.length > 2) {
-      setTimeout(() => resolve(interval), interval);
+function saveItemOnDatabase(res, callback) {
+  if (putCount < bookArray.length) {
+    let interval = Math.round(100 * Math.random() * bookArray[putCount].length);
+    if (bookArray[putCount].length <= 3) {
+      interval = 0;
     }
-    else {
-      reject(Error(`failure: '${name}' too short, not added to database`));
-    }
-    return interval;
-  });
+    putArray.push(`"${bookArray[putCount]}": ${interval}`);
+    putCount++;
+    setTimeout(() => {saveItemOnDatabase(res, callback);}, interval);
+  }
+  else {
+    callback(res);
+  }
+}
 
-  return await promise.then(
-    function (interval) {
-      if (env !== 'test') {
-        console.log(`success - added ${name} to database`);
-      }
-      return interval;
-    },
-    function (err) {
-      if (env !== 'test') {
-        console.log(err);
-      }
-      return 0;
-    }
-  );
+/**
+ * Callback function for 'saveItemOnDatabase' to output the results
+ * 
+ * @param {*} res 
+ */
+function outputResults(res) {
+  let stringResult = `{${putArray.join(',')}}`;
+  if (stringResult.indexOf(`": 0`) > 0) {
+    res.status(418).json(JSON.parse(stringResult));
+  }
+  else {
+    res.status(200).json(JSON.parse(stringResult));
+  }
 }
 
 module.exports = { getBooks, postBook, deleteBook, patchBook, putBook };

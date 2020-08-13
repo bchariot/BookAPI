@@ -294,10 +294,10 @@ module.exports = {
                   type: 'string'
                 },
                 example: {
-                  "Dune":59,
-                  "Gone With The Wind":38,
-                  "The Lord Of The Rings":15,
-                  "Advanced Calculus":135
+                  "Dune": 59,
+                  "Gone With The Wind": 38,
+                  "The Lord Of The Rings": 15,
+                  "Advanced Calculus": 135
                 }
               }
             }
@@ -310,10 +310,10 @@ module.exports = {
                   type: 'string'
                 },
                 example: {
-                  "Dune":59,
-                  "Gone With The Wind":38,
-                  "The Lord Of The Rings":15,
-                  "Advanced Calculus":135,
+                  "Dune": 59,
+                  "Gone With The Wind": 38,
+                  "The Lord Of The Rings": 15,
+                  "Advanced Calculus": 135,
                   "It":0
                 }
               }
